@@ -1,36 +1,35 @@
+from fastapi import HTTPException
+from requests.exceptions import RequestException
+from unittest.mock import MagicMock
 import pytest
-from httpx import AsyncClient
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-from unittest.mock import patch
 
-from main import app, FIRST_SERVICE_URL
+from your_module import app, FIRST_SERVICE_URL, process_stops
 
-@pytest.mark.asyncio
-async def test_process_stops():
-    test_stops_data = [{"name": "stop1", "location": "location1"}, {"name": "stop2", "location": "location2"}]
-    
-    # Мокируем запрос к первому сервису
-    with patch("requests.get") as mock_get:
-        mock_get.return_value.json.return_value = test_stops_data
-        
-        # Проверяем обработку данных
-        async with AsyncClient(app=app, base_url="http://test") as ac:
-            response = await ac.get("/processed_stops/")
-            assert response.status_code == 200
-            processed_stops = response.json()
-            assert processed_stops == [{"name": "STOP1", "location": "location1"}, {"name": "STOP2", "location": "location2"}]
-            
-        mock_get.assert_called_once_with(FIRST_SERVICE_URL)
+@pytest.fixture
+def mock_requests_get(mocker):
+    mock = mocker.patch('/processed_stops/')
+    yield mock
 
-@pytest.mark.asyncio
-async def test_process_stops_error():
-    # Мокируем запрос к первому сервису для имитации ошибки
-    with patch("requests.get") as mock_get:
-        mock_get.side_effect = Exception("Test error")
-        
-        # Проверяем обработку ошибки
-        async with AsyncClient(app=app, base_url="http://test") as ac:
-            response = await ac.get("/processed_stops/")
-            assert response.status_code == 500
-            assert "Error while fetching stops data" in response.text
+def test_process_stops(mock_requests_get):
+    # Устанавливаем мок для успешного запроса
+    mock_requests_get.return_value.json.return_value = [{"name": "stop1", "location": "location1"}, {"name": "stop2", "location": "location2"}]
+
+    # Вызываем функцию для обработки остановок
+    processed_stops = process_stops()
+
+    # Проверяем, что запрос был отправлен к правильному URL
+    mock_requests_get.assert_called_once_with(FIRST_SERVICE_URL)
+
+    # Проверяем, что данные обработаны правильно
+    assert processed_stops == [{"name": "STOP1", "location": "location1"}, {"name": "STOP2", "location": "location2"}]
+
+def test_process_stops_error(mock_requests_get):
+    # Устанавливаем мок для исключения при запросе
+    mock_requests_get.side_effect = RequestException("Test error")
+
+    # Проверяем, что возникает HTTPException при ошибке запроса
+    with pytest.raises(HTTPException) as exc_info:
+        process_stops()
+
+    assert exc_info.value.status_code == 500
+    assert "Error while fetching stops data" in str(exc_info.value)

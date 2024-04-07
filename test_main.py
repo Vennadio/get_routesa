@@ -4,7 +4,7 @@ from pathlib import Path
 
 class TestSyntax(unittest.TestCase):
     def test_syntax(self):
-        file_path = Path("routes_service.py")  # Предполагается, что ваш файл называется my_service.py
+        file_path = Path("routes_service.py")
         spec = importlib.util.spec_from_file_location(file_path.stem, file_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
