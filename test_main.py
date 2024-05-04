@@ -11,7 +11,7 @@ class TestSyntax(unittest.TestCase):
 
         self.assertIsNotNone(module)
     
-    def test_syntax1(self):
+    def test_request(self):
         file_path = Path("routes_service.py")
         spec = importlib.util.spec_from_file_location(file_path.stem, file_path)
         module = importlib.util.module_from_spec(spec)
