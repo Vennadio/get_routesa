@@ -24,7 +24,7 @@ class TestSyntax(unittest.TestCase):
         spec = importlib.util.spec_from_file_location(file_path.stem, file_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-
+        print("200")
         self.assertIsNotNone(module)
 
 
