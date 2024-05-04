@@ -27,3 +27,25 @@ def process_stops():
 
     except requests.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Error while fetching stops data: {str(e)}")
+
+@app.get("/first_stop/")
+def get_first_stop():
+    try:
+        # Получаем данные об остановках из первого сервиса
+        response = requests.get(FIRST_SERVICE_URL)
+        response.raise_for_status()  # Проверяем успешность запроса
+
+        stops_data = response.json()
+
+        # Если есть хотя бы одна остановка, возвращаем первую
+        if stops_data:
+            first_stop = {
+                "name": stops_data[0]["name"],
+                "location": stops_data[0]["location"]
+            }
+            return first_stop
+        else:
+            raise HTTPException(status_code=404, detail="No stops found")
+
+    except requests.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"Error while fetching stops data: {str(e)}")
