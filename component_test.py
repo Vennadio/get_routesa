@@ -1,5 +1,6 @@
 import unittest
 import requests
+import re
 
 class TestTabulation(unittest.TestCase):
 
