@@ -27,5 +27,6 @@ class TestSyntax(unittest.TestCase):
 
         self.assertIsNotNone(module)
 
+
 if __name__ == "__main__":
     unittest.main()
