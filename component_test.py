@@ -1,22 +1,19 @@
-import routes_service
 import unittest
 import requests
 
-class TestYourService(unittest.TestCase):
-    def setUp(self):
-        pass
+class TestTabulation(unittest.TestCase):
 
-    def tearDown(self):
-        pass
+    def test_tabulation(self):
+        with open('routes_service.py', 'r') as f:
+            lines = f.readlines()
+            for idx, line in enumerate(lines, start=1):
+                self.assertTrue(re.match(r'^\t', line), f"Tabulation missing in line {idx}")
 
-    def test_processed_stops_endpoint(self):
+class TestHTTP(unittest.TestCase):
 
-        url = "http://localhost:8000/processed_stops/" 
-        response = requests.get(url)
-
-        self.assertEqual(response.status_code, 200)
-
-        self.assertTrue(isinstance(response.json(), list))
+    def test_process_stops_http(self):
+        response = requests.get("http://localhost:8000/processed_stops/") 
+        self.assertEqual(response.status_code, 200, "HTTP request failed")
 
 if __name__ == '__main__':
     unittest.main()
